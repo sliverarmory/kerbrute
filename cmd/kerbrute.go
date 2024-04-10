@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -18,7 +17,8 @@ Warning: failed Kerberos Pre-Auth counts as a failed login and WILL lock out acc
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		//os.Exit(1)
+		return
 	}
 }
 

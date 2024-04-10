@@ -1,0 +1,23 @@
+{
+    "name": "kerbrute",
+    "version": "0.0.0",
+    "command_name": "kerbrute",
+    "extension_author": "c2biz",
+    "original_author": "ropnop",
+    "repo_url": "https://github.com/sliverarmory/kerbrute",
+    "help": "A tool to perform Kerberos pre-auth bruteforcing",
+    "long_help": "",
+    "entrypoint": "Run",
+    "files": [
+      {
+        "os": "windows",
+        "arch": "amd64",
+        "path": "kerbrute.x64.dll"
+      },
+      {
+        "os": "windows",
+        "arch": "386",
+        "path": "kerbrute.x86.dll"
+      }
+    ]
+  }

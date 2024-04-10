@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ropnop/kerbrute/util"
+	"github.com/sliverarmory/kerbrute/util"
 
 	"github.com/spf13/cobra"
 )
@@ -41,7 +41,8 @@ func passwordSpray(cmd *cobra.Command, args []string) {
 	if !userAsPass {
 		if len(args) != 2 {
 			logger.Log.Error("You must specify a password to spray with, or --user-as-pass")
-			os.Exit(1)
+			//os.Exit(1)
+			return
 		} else {
 			password = args[1]
 		}
@@ -68,7 +69,6 @@ func passwordSpray(cmd *cobra.Command, args []string) {
 	} else {
 		scanner = bufio.NewScanner(os.Stdin)
 	}
-	
 
 	for i := 0; i < threads; i++ {
 		go makeSprayWorker(ctx, usersChan, &wg, password, userAsPass)

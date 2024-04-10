@@ -1,56 +1,35 @@
-TARGET=./dist
-ARCHS=amd64 386 
-GOOS=windows linux darwin
-PACKAGENAME="github.com/ropnop/kerbrute"
+GO ?= go
+CGO_ENABLED = 1
+CC_X64 ?= x86_64-w64-mingw32-gcc
+CC_X86 ?= i686-w64-mingw32-gcc
+EXT_NAME ?= kerbrute
 
-COMMIT=`git rev-parse --short HEAD`
-DATE=`date +%m/%d/%y`
-GOVERSION=`go version | cut -d " " -f 3`
+.PHONY: all
+all: debug build
 
-ifdef VERSION
-	VERSION := $(VERSION)
-else
-	VERSION := dev
-endif
+.PHONY: build
+build: build_amd64 build_386
+	@mkdir -p build
 
-LDFLAGS="-X ${PACKAGENAME}/util.GitCommit=${COMMIT} \
--X ${PACKAGENAME}/util.BuildDate=${DATE} \
--X ${PACKAGENAME}/util.GoVersion=${GOVERSION} \
--X ${PACKAGENAME}/util.Version=${VERSION} \
-"
+.PHONY: build_amd64
+build_amd64:
+	CC=$(CC_X64) CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=amd64 $(GO) build -o build/$(EXT_NAME).x64.dll -buildmode=c-shared dll/main.go
 
-.PHONY: help windows linux mac all clean
+.PHONY: build_386
+build_386:
+	CC=$(CC_X86) CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=386 $(GO) build -o build/$(EXT_NAME).x86.dll -buildmode=c-shared dll/main.go
 
-help:           ## Show this help.
-	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
+.PHONY: debug
+debug: debug_amd64 debug_386
 
-windows: ## Make Windows x86 and x64 Binaries
-	@for ARCH in ${ARCHS}; do \
-		echo "Building for windows $${ARCH}.." ;\
-		GOOS=windows GOARCH=$${ARCH} go build -a -ldflags ${LDFLAGS} -o ${TARGET}/kerbrute_windows_$${ARCH}.exe || exit 1 ;\
-	done; \
-	echo "Done."
+.PHONY: debug_amd64
+debug_amd64:
+	GOOS=windows GOARCH=amd64 $(GO) build -gcflags "-N -l" -o build/$(EXT_NAME).x64.exe
 
-linux: ## Make Linux x86 and x64 Binaries
-	@for ARCH in ${ARCHS}; do \
-		echo "Building for linux $${ARCH}..." ; \
-		GOOS=linux GOARCH=$${ARCH} go build -a -ldflags ${LDFLAGS} -o ${TARGET}/kerbrute_linux_$${ARCH} || exit 1 ;\
-	done; \
-	echo "Done."
+.PHONY: debug_386
+debug_386:
+	GOOS=windows GOARCH=386 $(GO) build -gcflags "-N -l" -o build/$(EXT_NAME).x86.exe
 
-mac: ## Make Darwin (Mac) x86 and x64 Binaries
-	@for ARCH in ${ARCHS}; do \
-		echo "Building for mac $${ARCH}..." ; \
-		GOOS=darwin GOARCH=$${ARCH} go build -a -ldflags ${LDFLAGS} -o ${TARGET}/kerbrute_darwin_$${ARCH} || exit 1 ;\
-	done; \
-	echo "Done."
-
-clean: ## Delete any binaries
-	@rm -f ${TARGET}/* ; \
-	go clean -i -n github.com/ropnop/kerbrute ; \
-	echo "Done."
-
-all: ## Make Windows, Linux and Mac x86/x64 Binaries
-all: clean windows linux mac
-
-
+.PHONY: clean
+clean:
+	rm -rf build
